@@ -1,0 +1,48 @@
+{
+   "abstract" : "Pure perl API for Proxmox virtualisation",
+   "author" : [
+      "Brendan Beveridge <brendan@nodeintegration.com.au>, Dean Hamstead <dean@fragfest.com.au>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.300015, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Net-Proxmox-VE",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Carp" : "0",
+            "HTTP::Headers" : "0",
+            "HTTP::Request::Common" : "0",
+            "JSON" : "0",
+            "LWP::UserAgent" : "0",
+            "strict" : "0",
+            "warnings" : "0"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0",
+            "Test::Trap" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.001"
+}
+

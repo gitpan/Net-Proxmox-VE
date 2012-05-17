@@ -1,0 +1,13 @@
+
+
+This archive contains the distribution Net-Proxmox-VE,
+version 0.001:
+
+  Pure perl API for Proxmox virtualisation
+
+This software is copyright (c) 2012 by Dean Hamstad.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+
