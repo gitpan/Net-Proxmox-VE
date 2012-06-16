@@ -1,4 +1,5 @@
 Build.PL
+Changes
 LICENSE
 MANIFEST
 MANIFEST.SKIP
@@ -6,6 +7,7 @@ META.json
 META.yml
 README
 README.pod
+cpanfile
 dist.ini
 examples/pve.pl
 lib/Net/Proxmox/VE.pm
@@ -16,6 +18,10 @@ lib/Net/Proxmox/VE/Storage.pm
 t/00.load.t
 t/101.proxmox-ve-new.t
 t/120.proxmox-ve-access.t
+t/150-proxmox-ve-pools.t
 t/author-critic.t
+t/author-test-eol.t
+t/release-distmeta.t
+t/release-kwalitee.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t

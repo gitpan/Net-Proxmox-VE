@@ -4,7 +4,7 @@
       "Brendan Beveridge <brendan@nodeintegration.com.au>, Dean Hamstead <dean@fragfest.com.au>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300015, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Dist::Zilla version 4.300018, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -43,6 +43,17 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.001"
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=Net-Proxmox-VE"
+      },
+      "homepage" : "https://github.com/mrproper/proxmox-ve-api-perl",
+      "repository" : {
+         "type" : "https://github.com/mrproper/proxmox-ve-api-perl",
+         "url" : "git://github.com/mrproper/proxmox-ve-api-perl.git",
+         "web" : "https://github.com/mrproper/proxmox-ve-api-perl"
+      }
+   },
+   "version" : "0.002"
 }
 
