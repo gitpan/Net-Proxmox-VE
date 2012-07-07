@@ -99,8 +99,7 @@ I<%args> may items contain from the following list
 
 =item poolid
 
-String. The id of the pool you wish to access, this is required
-(in pve-poolid format)
+String. The id of the pool you wish to access, in pve-poolid format. This is required.
 
 =item comment
 
@@ -179,7 +178,7 @@ String. List of storage ids (in pve-storage-id-list format)
 
 =item vms
 
-String. List of virtual machines (in pve-vmid-list format)
+String. List of virtual machines in pve-vmid-list format.
 
 =back
 
@@ -206,7 +205,7 @@ sub update_pool {
         %args = @p;
     }
 
-    return $self->put( $base, $poolid, \%args );
+    return $self->put( $base, $poolid, \%args )
 
 }
 

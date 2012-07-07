@@ -6,6 +6,7 @@ MANIFEST.SKIP
 META.json
 META.yml
 README
+TODO
 cpanfile
 dist.ini
 examples/pve.pl

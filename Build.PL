@@ -19,7 +19,7 @@ my %module_build_args = (
     "Brendan Beveridge <brendan\@nodeintegration.com.au>, Dean Hamstead <dean\@fragfest.com.au>"
   ],
   "dist_name" => "Net-Proxmox-VE",
-  "dist_version" => "0.003",
+  "dist_version" => "0.004",
   "license" => "perl",
   "module_name" => "Net::Proxmox::VE",
   "recommends" => {},
