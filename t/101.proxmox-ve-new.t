@@ -88,7 +88,7 @@ ok(!$obj->debug(),'debug now turned off');
 
 =cut
 
-my $foo = $obj->get_nodes;
+my $foo = $obj->nodes;
 
 =head2 clear login ticket
 
@@ -109,7 +109,7 @@ checks users access stuff
 {
 
   my @index = $obj->access();
-  is_deeply(\@index,[map {{ subdir => $_ }} qw(users groups roles acl domains ticket password)], 'correct top level directories');
+  is_deeply(\@index,[ map {{ subdir => $_  }} qw(users groups roles acl domains ticket password)], 'correct top level directories');
 
   @index = $obj->access_domains();
   ok(scalar @index == 2, 'two access domains');

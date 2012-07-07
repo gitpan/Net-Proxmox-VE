@@ -5,19 +5,23 @@ package Net::Proxmox::VE;
 use Carp qw( croak );
 use strict;
 use warnings;
-use LWP::UserAgent;
 use HTTP::Headers;
 use HTTP::Request::Common qw(GET POST DELETE);
 use JSON qw(decode_json);
 
-use Net::Proxmox::VE::Access;
-use Net::Proxmox::VE::Cluster;
-
-#use Net::Proxmox::VE::Nodes;
+# done
 use Net::Proxmox::VE::Pools;
 use Net::Proxmox::VE::Storage;
 
+# wip
+use Net::Proxmox::VE::Access;
+use Net::Proxmox::VE::Cluster;
+use Net::Proxmox::VE::Nodes;
+
+
 our $VERSION = 0.002;
+
+=encoding utf8
 
 =head1 NAME
 
@@ -70,6 +74,7 @@ This class provides the building blocks for someone wanting to use PHP to talk t
 =cut
 
 sub action {
+
     my $self = shift or return;
     my %params = @_;
 
@@ -100,10 +105,10 @@ sub action {
 
     my $url = $self->url_prefix . '/api2/json/' . $params{path};
 
-    # Setup the useragent
-    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => undef } );
+    # Grab the useragent
+    my $ua = $self->{ua};
 
-    # Setup the request object
+    # Set up the request object
     my $request = HTTP::Request->new();
     $request->uri($url);
     $request->header(
@@ -124,8 +129,7 @@ sub action {
 # so we'll just force POST from PUT
     if ( $params{method} =~ m/^(PUT|POST)$/ ) {
         $request->method('POST');
-        my $content = join '&',
-          map { $_ . '=' . $params{post_data}->{$_} }
+        my $content = join '&', map { $_ . '=' . $params{post_data}->{$_} }
           sort keys %{ $params{post_data} };
         $request->content($content);
         $response = $ua->request($request);
@@ -137,6 +141,7 @@ sub action {
     else {
 
         # this shouldnt happen
+        croak 'this shouldnt happen';
     }
 
     if ( $response->is_success ) {
@@ -151,14 +156,25 @@ sub action {
         if ( $params{method} eq 'DELETE' ) {
             return 1;
         }
-        elsif ( ref $data eq 'HASH'
+
+        if ( ref $data eq 'HASH'
             && exists $data->{data} )
         {
-            return $data->{data} || 1;
+            if ( ref $data->{data} ) {
+
+                return wantarray
+                  ? @{ $data->{data} }
+                  : $data->{data};
+
+            }
+
+            return $data->{data}
+
         }
-        else {
-            return;
-        }
+
+        # just return true
+        return 1
+
     }
     else {
         print "WARNING: request failed: " . $request->as_string . "\n";
@@ -166,6 +182,17 @@ sub action {
     }
     return
 
+}
+
+=head2 api_version
+
+Returns the API version of the proxmox server we are talking to
+
+=cut
+
+sub api_version {
+    my $self = shift or return;
+    return $self->action( path => '/version', method => 'GET' );
 }
 
 =head2 api_version_check
@@ -176,70 +203,15 @@ Returns true if the api version is at least 2.0 (perl style true or false)
 
 =cut
 
-sub _get_api_version {
-    my $self = shift or return;
-    my $data = $self->action( path => '/version', method => 'GET' );
-    return $data;
-}
-
 sub api_version_check {
     my $self = shift or return;
 
-    my $data = $self->_get_api_version;
+    my $data = $self->api_version;
 
     if (   ref $data eq 'HASH'
         && $data->{version}
         && $data->{version} >= 2.0 )
     {
-        return 1;
-    }
-
-    return;
-}
-
-=head2 check_login_ticket
-
-Verifies if the objects login ticket is valid and not expired
-
-Returns true if valid
-Returns false and clears the the login ticket details inside the object if invalid
-
-=cut
-
-sub check_login_ticket {
-    my $self = shift or return;
-
-    if (   $self->{ticket}
-        && ref $self->{ticket} eq 'HASH'
-        && $self->{ticket}
-        && $self->{ticket}->{ticket}
-        && $self->{ticket}->{CSRFPreventionToken}
-        && $self->{ticket}->{username} eq $self->{params}->{username} . '@'
-        . $self->{params}->{realm}
-        && $self->{ticket_timestamp}
-        && $self->{ticket_timestamp} < ( time() + $self->{ticket_life} ) )
-    {
-        return 1;
-    }
-    else {
-        $self->clear_login_ticket;
-    }
-
-    return;
-}
-
-=head2 clear_login_ticket
-
-Clears the login ticket inside the object
-
-=cut
-
-sub clear_login_ticket {
-    my $self = shift or return;
-
-    if ( $self->{ticket} or $self->{timestamp} ) {
-        $self->{ticket}           = undef;
-        $self->{ticket_timestamp} = undef;
         return 1;
     }
 
@@ -283,10 +255,10 @@ sub delete {
     my $self = shift or return;
     my @path = @_    or return;    # using || breaks this
 
-    if ( $self->get_nodes ) {
+    if ( $self->nodes ) {
         return $self->action( path => join( '/', @path ), method => 'DELETE' );
     }
-    return
+    return;
 }
 
 =head2 get
@@ -300,76 +272,9 @@ sub get {
     my $self = shift or return;
     my @path = @_    or return;    # using || breaks this
 
-    if ( $self->get_nodes ) {
+    if ( $self->nodes ) {
         return $self->action( path => join( '/', @path ), method => 'GET' );
     }
-    return
-}
-
-=head2 get_nodes
-
-Returns the clusters node list from the object,
-if thats not defined it calls reload_nodes and returns the nodes
-
-=cut
-
-sub get_nodes {
-    my $self = shift or return;
-
-    return $self->{nodes}
-      if $self->{nodes}
-          || $self->reload_nodes;
-
-    return;
-}
-
-=head2 login
-
-Initiates the log in to the PVE Server using JSON API, and potentially obtains an Access Ticket.
-
-Returns true if success
-
-=cut
-
-sub login {
-    my $self = shift or return;
-
-    # Prepare login request
-    my $url = $self->url_prefix . '/api2/json/access/ticket';
-
-    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => undef } );
-
-    # Perform login request
-    my $request_time = time();
-    my $response     = $ua->post(
-        $url,
-        {
-            'username' => $self->{params}->{username} . '@'
-              . $self->{params}->{realm},
-            'password' => $self->{params}->{password},
-        },
-    );
-
-    if ( $response->is_success ) {
-        my $content           = $response->decoded_content;
-        my $login_ticket_data = decode_json( $response->decoded_content );
-        $self->{ticket} = $login_ticket_data->{data};
-
-# We use request time as the time to get the json ticket is undetermined,
-# id rather have a ticket a few seconds shorter than have a ticket that incorrectly
-# says its valid for a couple more
-        $self->{ticket_timestamp} = $request_time;
-        print "DEBUG: login successful\n"
-          if $self->{params}->{debug};
-        return 1;
-    }
-    else {
-
-        print "DEBUG: login not successful\n"
-          if $self->{params}->{debug};
-
-    }
-
     return;
 }
 
@@ -467,11 +372,12 @@ You are returned what action() with the POST method returns
 =cut
 
 sub post {
+
     my $self      = shift or return;
     my $path      = shift or return;
     my $post_data = shift or return;
 
-    if ( $self->get_nodes ) {
+    if ( $self->nodes ) {
 
         return $self->action(
             path      => $path,
@@ -497,28 +403,6 @@ sub put {
     return $self->post(@_);
 }
 
-=head2 reload_nodes
-
-gets and sets the list of nodes in the cluster into $self->{node_cluster_list}
-returns false if there is no nodes listed or an arrayref is not returns from action
-
-=cut
-
-sub reload_nodes {
-    my $self = shift or return;
-
-    my $nodes = $self->action( path => '/nodes', method => 'GET' );
-    if ( ref $nodes eq 'ARRAY'
-        && @{$nodes} > 0 )
-    {
-        $self->{nodes} = $nodes;
-        return 1;
-    }
-
-    print "ERROR: empty list of nodes in this cluster.\n";
-
-    return;
-}
 
 =head2 url_prefix
 
@@ -527,13 +411,16 @@ returns the url prefix used in the rest api calls
 =cut
 
 sub url_prefix {
+
     my $self = shift or return;
 
-    # Prepare login request
-    my $url_prefix =
-      'https://' . $self->{params}->{host} . ':' . $self->{params}->{port};
+    # Prepare prefix for request
+    my $url_prefix = sprintf( 'https://%s:%s',
+        $self->{params}->{host},
+        $self->{params}->{port} );
 
-    return $url_prefix;
+    return $url_prefix
+
 }
 
 =head1 SEE ALSO

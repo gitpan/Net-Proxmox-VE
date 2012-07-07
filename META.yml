@@ -9,7 +9,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.3601
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300018, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 4.300020, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -27,4 +27,4 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Net-Proxmox-VE
   homepage: https://github.com/mrproper/proxmox-ve-api-perl
   repository: git://github.com/mrproper/proxmox-ve-api-perl.git
-version: 0.002
+version: 0.003

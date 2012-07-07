@@ -7,7 +7,7 @@ use warnings;
 use base 'Exporter';
 
 our $VERSION = 0.1;
-our @EXPORT = qw( cluster );
+our @EXPORT  = qw( cluster );
 
 my $base = '/cluster';
 
@@ -22,22 +22,20 @@ sub cluster {
         my $storage = $self->get($base);
         return $storage;
 
-    # if there is a single argument, return a single storage instance as an object
-    } elsif (@a == 1) {
+  # if there is a single argument, return a single storage instance as an object
+    }
+    elsif ( @a == 1 ) {
 
-        my $storage = $self->get($base,$a[0]);
+        my $storage = $self->get( $base, $a[0] );
         return $storage;
 
-    # if there are multiple, then create new storage
-    } else {
+        # if there are multiple, then create new storage
+    }
+    else {
 
     }
 
     return 1
-
-}
-
-sub new {
 
 }
 
