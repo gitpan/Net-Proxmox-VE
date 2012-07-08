@@ -27,4 +27,4 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Net-Proxmox-VE
   homepage: https://github.com/mrproper/proxmox-ve-api-perl
   repository: git://github.com/mrproper/proxmox-ve-api-perl.git
-version: 0.004
+version: 0.005
